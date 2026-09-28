@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Gaming Hub + Proxy Search Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: #aaa;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .section h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section p {
+            color: #bbb;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1em;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            background: linear-gradient(45deg, #00d4ff, #0099ff);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid #00d4ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .result strong {
+            color: #00d4ff;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .result-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+            color: #ddd;
+        }
+
+        .status-box {
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 4px solid #00ff00;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            color: #00ff00;
+            display: none;
+        }
+
+        .status-box.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-box {
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 4px solid #ff4444;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            color: #ff6666;
+            display: none;
+        }
+
+        .error-box.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        .stat-item {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-item strong {
+            color: #00d4ff;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .api-status {
+            font-size: 0.85em;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #ffa500;
+        }
+
+        .game-server-info {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>☁️ Cloud Gaming Hub</h1>
+        <p>Premium Cloud Gaming + Proxy Search Engine</p>
+    </header>
+
+    <div class="container">
+        <!-- Cloud Gaming Section -->
+        <div class="section">
+            <h2>🎮 Cloud Gaming Console</h2>
+            <p>Launch and manage your game sessions in the cloud</p>
+
+            <div>
+                <label for="gameSelect">Select Game:</label>
+                <select id="gameSelect">
+                    <option>Fortnite</option>
+                    <option>Call of Duty</option>
+                    <option>Cyberpunk 2077</option>
+                    <option>Elden Ring</option>
+                    <option>The Witcher 3</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="serverRegion">Server Region:</label>
+                <select id="serverRegion">
+                    <option>US - East</option>
+                    <option>US - West</option>
+                    <option>EU - Europe</option>
+                    <option>ASIA - Singapore</option>
+                    <option>AU - Australia</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="quality">Graphics Quality:</label>
+                <select id="quality">
+                    <option>Ultra (4K @ 60fps)</option>
+                    <option>High (1440p @ 60fps)</option>
+                    <option>Medium (1080p @ 60fps)</option>
+                    <option>Low (720p @ 30fps)</option>
+                </select>
+            </div>
+
+            <button onclick="launchGame()">🚀 Launch Game Server</button>
+
+            <div id="gameStatus"></div>
+            <div class="stats" id="gameStats" style="display:none;">
+                <div class="stat-item">
+                    <strong id="statLatency">0ms</strong>
+                    Latency
+                </div>
+                <div class="stat-item">
+                    <strong id="statUptime">0s</strong>
+                    Uptime
+                </div>
+                <div class="stat-item">
+                    <strong id="statFPS">0</strong>
+                    FPS
+                </div>
+                <div class="stat-item">
+                    <strong id="statPlayers">1</strong>
+                    Players
+                </div>
+            </div>
+
+            <div class="api-status">
+                📡 API Status: <span id="apiStatus" style="color:#00ff00;">Connected</span>
+            </div>
+        </div>
+
+        <!-- Proxy Search Section -->
+        <div class="section">
+            <h2>🔍 Proxy Search Engine</h2>
+            <p>Find and filter available proxies with real-time data</p>
+
+            <div>
+                <label for="searchQuery">Search Proxies:</label>
+                <input type="text" id="searchQuery" placeholder="Enter keyword or IP..." value="http">
+            </div>
+
+            <div>
+                <label for="proxyType">Proxy Type:</label>
+                <select id="proxyType">
+                    <option>All Types</option>
+                    <option>HTTP</option>
+                    <option>HTTPS</option>
+                    <option>SOCKS5</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="country">Country Filter:</label>
+                <select id="country">
+                    <option>All Countries</option>
+                    <option>United States</option>
+                    <option>Canada</option>
+                    <option>United Kingdom</option>
+                    <option>Germany</option>
+                    <option>France</option>
+                    <option>Japan</option>
+                </select>
+            </div>
+
+            <button onclick="searchProxies()">🔎 Search Proxies</button>
+
+            <div id="proxyResults"></div>
+
+            <div class="stats" id="proxyStats" style="display:none;">
+                <div class="stat-item">
+                    <strong id="statFound">0</strong>
+                    Found
+                </div>
+                <div class="stat-item">
+                    <strong id="statAverage">0ms</strong>
+                    Avg Speed
+                </div>
+            </div>
+
+            <div class="api-status">
+                📡 Proxy API Status: <span id="proxyApiStatus" style="color:#00ff00;">Ready</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
