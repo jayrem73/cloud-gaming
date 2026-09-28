@@ -1,0 +1,11 @@
+run = "python server.py"
+language = "python3"
+
+[packager]
+language = "python3"
+
+[packager.features]
+packageSearch = true
+
+[nix]
+channel = "stable-22_11"
